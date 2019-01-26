@@ -34,7 +34,7 @@ class AddCartItem(View):
         quantity = request.POST.get("quantity", None)
         if quantity is not None and int(quantity) > 0:
             try:
-                item = CartItem.objects.get(cart__user=request.user, product_id=pk)
+                item = CartItem.objects.get(cart__user=request.user, cart__accepted=False, product_id=pk)
                 item.quantity += int(quantity)
             except CartItem.DoesNotExist:
                 item = CartItem(
@@ -99,7 +99,7 @@ class AddOrder(View):
         cart.save()
         Order.objects.create(cart=cart)
         Cart.objects.create(user=request.user)
-        return redirect('orders')
+        return redirect('order_complete')
 
 
 class OrderList(ListView):
@@ -129,6 +129,86 @@ class CategoryProduct(ListView):
         return products
 
 
+class UserProfile(View):
+    """profile view"""
+
+    def get(self, request, pk=None):
+        if pk:
+            user = User.objects.get(pk=pk)
+        else:
+            user = request.user
+        context = {
+            'user': user
+        }
+        return render(request, 'shop/profile.html', context)
+
+
+class EditProfile(UpdateView):
+    """edit profile"""
+
+    def get(self, request):
+        form = UserUpdateForm(instance=request.user)
+        u_form = ProfileUpdateForm(instance=request.user.userprofile)
+        forms = {
+            'form': form,
+            'u_form': u_form
+        }
+        return render(request, 'shop/edit-profile.html', forms)
+
+    def post(self, request):
+        if request.method == 'POST':
+            form = UserUpdateForm(request.POST, instance=request.user)
+            u_form = ProfileUpdateForm(request.POST, instance=request.user.userprofile)
+
+            if form.is_valid() and u_form.is_valid():
+                form.save()
+                u_form.save()
+                return redirect('user_profile')
+
+
+class Checkout(View):
+    """ checkout"""
+
+    def get(self, request, total=0):
+        cart_item = CartItem.objects.filter(cart__user=self.request.user, cart__accepted=False)
+        for item in cart_item:
+            total += (item.product.price * item.quantity)
+        form = UserUpdateForm(instance=request.user)
+        u_form = ProfileUpdateForm(instance=request.user.userprofile)
+        cart_id = Cart.objects.get(user=self.request.user, accepted=False).id
+        context = {
+            'form': form,
+            'u_form': u_form,
+            'cart_item': cart_item,
+            'total': total,
+            'cart_id': cart_id
+        }
+        return render(request, 'shop/checkout.html', context)
+
+
+class OrderComplete(View):
+
+    def get(self, request):
+        user = request.user
+        name = user.first_name
+        context = {'name': name}
+        return render(request, 'shop/order-complete.html', context)
+    # def get(self, request):
+    #
+    #     try:
+    #         cart = Cart.objects.get(user=request.user, accepted=False)
+    #         cart_item = CartItem.objects.filter(cart=cart)
+    #     except cart_item.DoesNotExist:
+    #         return redirect('/')
+    #     new_order, created = Order.objects.get_or_create(cart=cart)
+    #     if created:
+    #         cart = Cart.objects.get(user=request.user, accepted=False)
+    #         cart.accepted = True
+    #         cart.save()
+    #         new_order.cart = cart
+    #         new_order.save()
+    #         Cart.objects.create(user=request.user)
+    #     return redirect('/')
 
 
 

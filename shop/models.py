@@ -83,6 +83,31 @@ class CartItem(models.Model):
         return "{}".format(self.cart)
 
 
+class Order(models.Model):
+    """Заказы"""
+    cart = models.ForeignKey(Cart, verbose_name='Корзина', on_delete=models.CASCADE)
+    accepted = models.BooleanField(verbose_name='Заказ выполнен', default=False)
+    date = models.DateTimeField("Дата", default=timezone.now())
+
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
+
+    def __str__(self):
+        return "{}".format(self.cart)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    address_type = models.CharField(max_length=120)
+    address_line = models.CharField(max_length=120)
+    address_line_2 = models.CharField(max_length=120, null=True, blank=True)
+    city = models.CharField(max_length=120)
+    postal_code = models.CharField(max_length=120)
+    phone = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(self.user)
 
 
 @receiver(post_save, sender=User)
@@ -92,3 +117,8 @@ def create_user_cart(sender, instance, created, **kwargs):
         Cart.objects.create(user=instance)
 
 
+@receiver(post_save, sender=User)
+def user_profile(sender, instance, created, **kwargs):
+    """Создание profile пользователя"""
+    if created:
+        UserProfile.objects.create(user=instance)

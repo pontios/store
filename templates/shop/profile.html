@@ -1,0 +1,20 @@
+{% extends 'shop/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<div class="container">
+    <h1>Profile</h1>
+    <p>Username: {{ user }}</p>
+    <p>First name: {{ user.first_name }}</p>
+    <p>Last name: {{ user.last_name }}</p>
+    <p>Email: {{ user.email }}</p>
+    <p>City: {{ user.userprofile.city }}</p>
+    <p>Description: {{ user.userprofile.address_type }}</p>
+    <p>Address: {{ user.userprofile.address_line }}</p>
+    <p>Phone: {{ user.userprofile.phone }}</p>
+    <p>City: {{ user.userprofile.city }}</p>
+    <p>Second Address: {{ user.userprofile.address_line_2 }}</p>
+    <p>Zip/Postal Code: {{ user.userprofile.postal_code }}</p>
+    <a href="{% url 'edit_profile' %}"><button >Edit</button></a>
+</div>
+{% endblock content %}

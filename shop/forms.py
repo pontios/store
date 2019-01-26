@@ -11,4 +11,28 @@ class CartItemForm(forms.ModelForm):
         fields = ("quantity",)
 
 
+class UserUpdateForm(forms.ModelForm):
+    """Форма добавления profile"""
+    # template_name = '/something/else'
 
+    class Meta:
+        model = User
+
+        fields = (
+            'email',
+            'first_name',
+            'last_name'
+        )
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = (
+            'address_type',
+            'address_line',
+            'address_line_2',
+            'city',
+            'postal_code',
+            'phone',
+        )
