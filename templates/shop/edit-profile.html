@@ -1,0 +1,13 @@
+{% extends 'shop/base.html' %}
+{% load staticfiles %}
+{% block content %}
+    <div class="container">
+    <form action="{% url 'edit_profile' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {{ u_form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+    <br>
+</div>
+{% endblock content %}
